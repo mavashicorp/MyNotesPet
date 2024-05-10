@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddConnections();//добавлет поддержку контроллеров
-builder.Services.AddScoped<NotesDBContext>();//добавл€ю DbContext в контейнер зависимостей
+builder.Services.AddScoped<NotesDbContext>();//добавл€ю DbContext в контейнер зависимостей
 
 var app = builder.Build(); 
 
