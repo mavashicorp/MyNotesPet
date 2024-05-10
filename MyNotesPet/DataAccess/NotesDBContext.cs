@@ -12,8 +12,12 @@ namespace MyNotesPet.DataAccess
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Database"));
+            //optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Database"));
             //подключает провайдер npgsql и передаю строку подключения
+
+            optionsBuilder.UseMySQL(_configuration.GetConnectionString("Database"));
+            //буду использовать MySql
+            
         }
 
     }
