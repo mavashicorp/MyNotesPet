@@ -1,9 +1,5 @@
 ﻿namespace MyNotesPet.Contracts
 {
-    public class GetNotesRequest(string? Search, string? SortItem, string? SortOrder)
-    {
-        public string? SortOrder { get; internal set; }
-        public object Search { get; internal set; }
-    }
+    public record GetNotesRequest(string? Search, string? SortItem, string? SortOrder);
     //? для того что бы данные могли быть null
 }

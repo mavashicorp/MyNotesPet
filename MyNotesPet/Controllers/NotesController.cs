@@ -1,54 +1,56 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyNotesPet.Contracts;
 using MyNotesPet.DataAccess;
 using MyNotesPet.Models;
 
-namespace MyNotesPet.Controllers
+namespace MyNotes.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class NotesController : ControllerBase
 {
-    [Route("[controller]")]
-    [ApiController]
-    public class NotesController : ControllerBase
+    private readonly NotesDbContext _dbContext;
+
+    public NotesController(NotesDbContext dbContext)
     {
-        private readonly NotesDbContext _dbContext;
-        public NotesController(NotesDbContext dbContext) {
-            _dbContext = dbContext;
-        }
+        _dbContext = dbContext;
+    }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateNoteRequest request, CancellationToken ct)
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateNoteRequest request, CancellationToken ct)
+    {
+        var note = new Note(request.Title, request.Description);
+
+        await _dbContext.Notes.AddAsync(note, ct);
+        await _dbContext.SaveChangesAsync(ct);
+
+        return Ok();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Get([FromQuery] GetNotesRequest request, CancellationToken ct)
+    {
+        var notesQuery = _dbContext.Notes
+            .Where(n => string.IsNullOrWhiteSpace(request.Search) ||
+                        n.Title.ToLower().Contains(request.Search.ToLower()));
+
+        Expression<Func<Note, object>> selectorKey = request.SortItem?.ToLower() switch
         {
-            var note = new Note(request.Title, request.Description);
+            "date" => note => note.CreatedAt,
+            "title" => note => note.Title,
+            _ => note => note.Id
+        };
 
-            await _dbContext.Notes.AddAsync(note, ct);
-            await _dbContext.SaveChangesAsync();//нужен для сохранения данных в базе данных
+        notesQuery = request.SortOrder == "desc"
+            ? notesQuery.OrderByDescending(selectorKey)
+            : notesQuery.OrderBy(selectorKey);
 
-            return Ok();
-        }
+        var noteDtos = await notesQuery
+            .Select(n => new NoteDto(n.Id, n.Title, n.Description, n.CreatedAt))
+            .ToListAsync(cancellationToken: ct);
 
-        [HttpGet]
-        public async Task<IActionResult> Get(GetNotesRequest request, CancellationToken ct)
-        {
-            var notesQuery = _dbContext.Notes
-            .Where(n => !string.IsNullOrWhiteSpace(request.Search) &&
-                    n.Title.ToLower().Contains(request.Search.ToLower()));
-
-            if (request.SortOrder == "desc")
-            {
-                notesQuery = notesQuery.OrderByDescending(nameof => nameof.CreatedAt);
-            }
-            else
-            {
-                notesQuery = notesQuery.OrderBy(nameof=>nameof.CreatedAt);
-            }
-
-            var noteDtos = await notesQuery
-                .Select(n => new NoteDto(n.Id, n.Title, n.Description, n.CreatedAt))
-                .ToListAsync(CancellationToken: ct);
-
-            return Ok(new GetNotesResponse(noteDtos));
-            
-        }
+        return Ok(new GetNotesResponse(noteDtos));
     }
 }
