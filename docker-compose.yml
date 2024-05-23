@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  mynotespet:
+    image: ${DOCKER_REGISTRY-}mynotespet
+    build:
+      context: .
+      dockerfile: MyNotesPet/Dockerfile

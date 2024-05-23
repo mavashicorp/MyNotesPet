@@ -1,6 +1,5 @@
-﻿using System.Globalization;
+﻿using static MyNotesPet.Contracts.NotesDto;
 
-namespace MyNotesPet.Contracts
-{
-    public record GetNotesResponse(List<NoteDto> notes);
-}
+namespace MyNotes.Contracts;
+
+public record GetNotesResponse(List<NoteDto> notes);

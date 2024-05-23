@@ -1,9 +1,11 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MyNotes.Contracts;
 using MyNotesPet.Contracts;
 using MyNotesPet.DataAccess;
 using MyNotesPet.Models;
+using static MyNotesPet.Contracts.NotesDto;
 
 namespace MyNotes.Controllers;
 
